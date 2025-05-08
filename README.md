@@ -1,23 +1,137 @@
-# TreeQSM
+# TreeQSM-2.3.1 (Modified for enhanced batch processing and ply Conversion)
 
-**Version 2.3.1**
-**Reconstruction of quantitative structure models of trees from point cloud data**
+This repository is a modified version of [TreeQSM v2.3.1](https://github.com/InverseTampere/TreeQSM/releases/tag/v2.3.1), aimed at improving I/O flexibility for batch processing of QSM (Quantitative Structure Model) reconstructions from point clouds in ply format. 
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.844626.svg)](https://doi.org/10.5281/zenodo.844626) (DOI for version 2.3.0)
+Key features of this fork:
+- Easy generation of multiple, customisable TreeQSM input files.
+- Batch execution of TreeQSM scripts and integration with `optqsm` for best-fit model selection.
+- Additional Python tools for:
+  - Converting PLY files to float64 which runqsm accepts.
+  - Converting QSM `.mat` output into `.ply` files for visualisation in tools like CloudCompare.
 
-TreeQSM is a modelling method that reconstructs quantitative structure models (QSMs) of trees from point clouds. A QSM consists of a hierarchical collection of cylinders which estimate topological, geometrical and volumetric details of the woody structure of the tree. The input point cloud, which is usually produced by a terrestrial laser scanner, must contain only one tree, but the point cloud may contain also some points from the ground and understory. Much more details of the method and QSMs can be found from the manual that is part of the code distribution.
+---
 
-Web: http://math.tut.fi/inversegroup/  
-Some published papers about the method and applications:  
-Raumonen et al. 2013, Remote Sensing https://www.mdpi.com/2072-4292/5/2/491  
-Calders et al. 2015, Methods in Ecology and Evolution https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12301  
-Raumonen et al. 2015, ISPRS Annals https://www.isprs-ann-photogramm-remote-sens-spatial-inf-sci.net/II-3-W4/189/2015/  
-Åkerblom et al. 2015, Remote Sensing https://www.mdpi.com/2072-4292/7/4/4581  
-Åkerblom et al. 2017, Remote Sensing of Environment https://www.sciencedirect.com/science/article/abs/pii/S0034425716304746  
-de Tanago Menaca et al. 2017, Methods in Ecology and Evolution https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12904  
-Åkerblom et al. 2018, Interface Focus http://dx.doi.org/10.1098/rsfs.2017.0045   
-Disney et al. 2018, Interface Focus http://dx.doi.org/10.1098/rsfs.2017.0048   
+## Installation
+
+### 1. Clone the repositories
+Download the modified TreeQSM and OptQSM source code to your local machine:
+
+```bash
+git clone https://github.com/wanxinyang/TreeQSM-2.3.1-mod.git
+git clone https://github.com/wanxinyang/optqsm-mod.git
+```
+
+### 2. Create and activate the conda environment
+
+```bash
+conda create -n treeqsm python=3.10 pandas numpy scipy -c conda-forge -y
+conda activate treeqsm
+```
+
+---
+
+## Workflow
+
+### Directory Structure Example
+Organise your data as follows before running the workflow:
+
+```
+DATA/
+├── clouds/              # Original and converted point clouds (.ply)
+│   └── float64/         # Output of ply2float64.py
+├── models/              # Workspace for processing and results
+│   ├── inputs/          # TreeQSM input .m files
+│   ├── results/         # QSM reconstruction results (.mat)
+│   └── optqsm/          # Selected best-fitting QSMs and logs
+```
 
 
-The TreeQSM is written in Matlab.
-The main function is _treeqsm.m_, which takes in a point cloud and a structure array specifying the needed parameters. Refer to the manual or the help documentation of a particular function for further details.
+### Step 1: Convert point cloud files to float64 (if needed)
+
+#### Option A: Convert all `.ply` files in a directory
+
+```bash
+python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/ply2float64.py -i /PATH/TO/clouds/
+```
+
+#### Option B: Convert a single `.ply` file
+
+```bash
+python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/ply2float64.py -i /PATH/TO/file.ply
+```
+**Available Flags:**
+
+```
+-i, --input INPUT       Path to a .ply file or a directory containing .ply files
+-o, --output OUTPUT     Directory to save converted PLY file(s); defaults to a 'float64/'
+                        directory created alongside the input
+--suffix SUFFIX     Optional suffix added before the .ply extension in output filenames;
+                        use 'none' to disable the suffix
+```
+
+---
+
+### Step 2: Generate TreeQSM input files
+
+```bash
+python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/generate_inputs-updated-matlab.py -i /PATH/TO/clouds/float64/ -o /PATH/TO/inputs/
+```
+
+For additional options to customise input parameters, run the script with the `-h` flag to view the help message.
+
+A `results/` directory will be automatically generated alongside `inputs/`.
+
+---
+
+### Step 3: Run TreeQSM in MATLAB through command line
+
+#### Option A: Run a single input `.m` file
+
+```bash
+matlab -nodisplay -r "run('FILENAME.m'); exit;" > FILENAME.log
+```
+
+#### Option B: Batch-run all `.m` files in a directory
+
+```bash
+cd /PATH/TO/models/inputs/TREEID/
+
+total=$(ls *.m | wc -l)
+count=0
+for f in *.m; do
+  count=$((count+1))
+  echo "[$count/$total] Running $f..."
+  matlab -nodisplay -nosplash -r "run(fullfile(pwd,'$f')); exit;" > "${f%%.m}.log"
+done
+```
+
+---
+
+### Step 4: Run `optqsm` to select the best-fitting QSM
+
+```bash
+cd /PATH/TO/models/
+mkdir -p optqsm && cd optqsm/
+
+matlab -nodisplay -r "addpath(genpath('/PATH/TO/TreeQSM-2.3.1-mod-matlab/src/')); \
+addpath('/PATH/TO/optqsm-mod-matlab/src/'); runopt('../results/*/*.mat'); exit;" > optqsm-log.log
+```
+
+---
+
+### Step 5: Convert best-fitting QSM `.mat` files into `.ply`
+
+```bash
+conda activate treeqsm
+cd /PATH/TO/models/optqsm/
+
+python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/mat2ply.py ./*.mat
+```
+
+
+---
+
+## License
+
+This project follows the original [TreeQSM license](https://github.com/InverseTampere/TreeQSM/blob/master/LICENSE).
+

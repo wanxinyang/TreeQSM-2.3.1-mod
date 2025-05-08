@@ -16,7 +16,7 @@ def parse_args():
                         type=str, required=True,
                         help='Directory to store generated .m input scripts.')
     parser.add_argument('--treeqsm_src',
-                        type=str, default='/data/TLS2/tools/qsm/TreeQSM_2.3.1-mod-matlab/src/',
+                        type=str, default='/data/TLS2/tools/qsm/TreeQSM-2.3.1-mod-matlab/src/',
                         help="Path to TreeQSM source code (default: '%(default)s').")
     # parser.add_argument('--optqsm_src',
     #                     type=str, default='/data/TLS2/tools/qsm/optqsm-mod-matlab/src/',

@@ -53,13 +53,13 @@ DATA/
 Replace /PATH/TO/ in all following commands according to your local file structure.
 
 ```bash
-python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/ply2float64.py -i /PATH/TO/clouds/
+python /PATH/TO/TreeQSM-2.3.1-mod/python/ply2float64.py -i /PATH/TO/clouds/
 ```
 
 #### Option B: Convert a single `.ply` file
 
 ```bash
-python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/ply2float64.py -i /PATH/TO/file.ply
+python /PATH/TO/TreeQSM-2.3.1-mod/python/ply2float64.py -i /PATH/TO/file.ply
 ```
 **Available Flags:**
 
@@ -76,7 +76,7 @@ python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/ply2float64.py -i /PATH/TO/file.
 ### Step 2: Generate TreeQSM input files
 
 ```bash
-python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/generate_inputs-updated-matlab.py -i /PATH/TO/clouds/float64/ -o /PATH/TO/inputs/
+python /PATH/TO/TreeQSM-2.3.1-mod/python/generate_inputs-updated-matlab.py -i /PATH/TO/clouds/float64/ -o /PATH/TO/inputs/ --treeqsm_src /PATH/TO/TreeQSM-2.3.1-mod/src/ --optqsm_src /PATH/TO/optqsm-mod/src/
 ```
 
 For additional options to customise input parameters, run the script with the `-h` flag to view the help message.
@@ -115,8 +115,8 @@ done
 cd /PATH/TO/models/
 mkdir -p optqsm && cd optqsm/
 
-matlab -nodisplay -r "addpath(genpath('/PATH/TO/TreeQSM-2.3.1-mod-matlab/src/')); \
-addpath('/PATH/TO/optqsm-mod-matlab/src/'); runopt('../results/*/*.mat'); exit;" > optqsm-log.log
+matlab -nodisplay -r "addpath(genpath('/PATH/TO/TreeQSM-2.3.1-mod/src/')); \
+addpath('/PATH/TO/optqsm-mod/src/'); runopt('../results/*/*.mat'); exit;" > optqsm-log.log
 ```
 
 ---
@@ -127,7 +127,7 @@ addpath('/PATH/TO/optqsm-mod-matlab/src/'); runopt('../results/*/*.mat'); exit;"
 conda activate treeqsm
 cd /PATH/TO/models/optqsm/
 
-python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/mat2ply.py ./*.mat
+python /PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py ./*.mat
 ```
 
 

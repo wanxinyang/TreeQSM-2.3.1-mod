@@ -1,4 +1,4 @@
-# TreeQSM-2.3.1 (Modified for enhanced batch processing and ply Conversion)
+# Modified TreeQSM-2.3.1 and a pipeline for enhanced batch processing and ply conversion
 
 This repository is a modified version of [TreeQSM v2.3.1](https://github.com/InverseTampere/TreeQSM/releases/tag/v2.3.1), aimed at improving I/O flexibility for batch processing of QSM (Quantitative Structure Model) reconstructions from point clouds in ply format. 
 
@@ -14,7 +14,7 @@ Key features of this fork:
 ## Installation
 
 ### 1. Clone the repositories
-Download the modified TreeQSM and OptQSM source code to your local machine:
+Download the modified TreeQSM and optqsm source code to your local machine:
 
 ```bash
 git clone https://github.com/wanxinyang/TreeQSM-2.3.1-mod.git
@@ -49,6 +49,8 @@ DATA/
 ### Step 1: Convert point cloud files to float64 (if needed)
 
 #### Option A: Convert all `.ply` files in a directory
+
+Replace /PATH/TO/ in all following commands according to your local file structure.
 
 ```bash
 python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/ply2float64.py -i /PATH/TO/clouds/
@@ -133,5 +135,5 @@ python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/mat2ply.py ./*.mat
 
 ## License
 
-This project follows the original [TreeQSM license](https://github.com/InverseTampere/TreeQSM/blob/master/LICENSE).
+This repository follows the original [TreeQSM license](https://github.com/InverseTampere/TreeQSM/blob/master/LICENSE) and [optqsm license](https://github.com/apburt/optqsm/blob/master/LICENSE).
 

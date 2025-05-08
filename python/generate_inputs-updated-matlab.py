@@ -18,9 +18,9 @@ def parse_args():
     parser.add_argument('--treeqsm_src',
                         type=str, default='/data/TLS2/tools/qsm/TreeQSM_2.3.1-mod-matlab/src/',
                         help="Path to TreeQSM source code (default: '%(default)s').")
-    parser.add_argument('--optqsm_src',
-                        type=str, default='/data/TLS2/tools/qsm/optqsm-mod-matlab/src/',
-                        help="Path to OptQSM source code (default: '%(default)s').")
+    # parser.add_argument('--optqsm_src',
+    #                     type=str, default='/data/TLS2/tools/qsm/optqsm-mod-matlab/src/',
+    #                     help="Path to OptQSM source code (default: '%(default)s').")
     parser.add_argument('--patchdiam1',
                         type=float, nargs='+',
                         default=[0.2, 0.25, 0.3],

@@ -209,7 +209,8 @@ name = ['Cover sets      ';
         'Distances       '];
     
 disp('---------------')
-disp(['  ',inputs.name,', Tree = ',num2str(inputs.tree),', Model = ',num2str(inputs.model)])
+% disp(['  ',inputs.name,', Tree = ',num2str(inputs.tree),', Model = ',num2str(inputs.model)])
+disp(['Output file: ',inputs.name])
 
 % Input parameters
 PatchDiam1 = inputs.PatchDiam1;
@@ -441,13 +442,15 @@ for h = 1:nd
             %% Save the output into results-folder
             % matlab-format (.mat)
             if inputs.savemat
-              str = [inputs.name,'_t',num2str(inputs.tree),'_m',num2str(inputs.model)];
-              save(['results/QSM_',str],'QSM')
+              % str = [inputs.name,'_t',num2str(inputs.tree),'_m',num2str(inputs.model)];
+              str = inputs.name;
+              save(str, 'qsm', '-v7')
             end
             % text-format (.txt)
             if inputs.savetxt
               if nd > 1 || na > 1 || ni > 1 || nl > 1 || nf > 1
-                str = [inputs.name,'_t',num2str(inputs.tree),'_m',num2str(inputs.model)];
+                % str = [inputs.name,'_t',num2str(inputs.tree),'_m',num2str(inputs.model)];
+                str = inputs.name;
                 if nd > 1
                   str = [str,'_D',num2str(PatchDiam1(h))];
                 end
@@ -464,7 +467,8 @@ for h = 1:nd
                   str = [str,'_F',num2str(FilRad(l))];
                 end
               else
-                str = [inputs.name,'_t',num2str(inputs.tree),'_m',num2str(inputs.model)];
+                % str = [inputs.name,'_t',num2str(inputs.tree),'_m',num2str(inputs.model)];
+                str = inputs.name;
               end
               save_model_text(qsm,str)
             end

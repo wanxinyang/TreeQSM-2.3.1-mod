@@ -76,7 +76,7 @@ python /PATH/TO/TreeQSM-2.3.1-mod/python/ply2float64.py -i /PATH/TO/file.ply
 ### Step 2: Generate TreeQSM input files
 
 ```bash
-python /PATH/TO/TreeQSM-2.3.1-mod/python/generate_inputs-updated-matlab.py -i /PATH/TO/clouds/float64/ -o /PATH/TO/inputs/ --treeqsm_src /PATH/TO/TreeQSM-2.3.1-mod/src/
+python /PATH/TO/TreeQSM-2.3.1-mod/python/generate_inputs-updated-matlab.py -i /PATH/TO/clouds/float64/ -o /PATH/TO/inputs/
 ```
 
 For additional options to customise input parameters, run the script with the `-h` flag to view the help message.

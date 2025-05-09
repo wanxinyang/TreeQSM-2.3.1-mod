@@ -5,6 +5,7 @@ import numpy as np
 import argparse
 
 def parse_args():
+    
     parser = argparse.ArgumentParser(
         description='Generate input .m files for TreeQSM modelling with configurable parameters.'
     )
@@ -15,8 +16,11 @@ def parse_args():
     parser.add_argument('-o', '--output_path',
                         type=str, required=True,
                         help='Directory to store generated .m input scripts.')
+    
+    SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+    DEFAULT_TREEQSM_SRC = os.path.abspath(os.path.join(SCRIPT_DIR, '..', 'src'))
     parser.add_argument('--treeqsm_src',
-                        type=str, default='/data/TLS2/tools/qsm/TreeQSM-2.3.1-mod-matlab/src/',
+                        type=str, default=DEFAULT_TREEQSM_SRC,
                         help="Path to TreeQSM source code (default: '%(default)s').")
     # parser.add_argument('--optqsm_src',
     #                     type=str, default='/data/TLS2/tools/qsm/optqsm-mod-matlab/src/',

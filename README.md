@@ -76,12 +76,39 @@ python /PATH/TO/TreeQSM-2.3.1-mod/python/ply2float64.py -i /PATH/TO/file.ply
 ### Step 2: Generate TreeQSM input files
 
 ```bash
-python /PATH/TO/TreeQSM-2.3.1-mod/python/generate_inputs-updated-matlab.py -i /PATH/TO/clouds/float64/ -o /PATH/TO/inputs/
+python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/generate_inputs-updated-matlab.py -i /PATH/TO/POINT_CLOUD.ply -o /PATH/TO/SAVE/INPUT_FILENAME.m -rdir /PATH/TO/SAVE/TreeQSM_OUTPUTS/
 ```
 
-For additional options to customise input parameters, run the script with the `-h` flag to view the help message.
+The script now requires a single input file (`-i`), and optionally an output filename (`-o`), and a result directory (`-rdir`).
 
-A `results/` directory will be automatically generated alongside `inputs/`.
+```
+-i, --input           Path to the input point cloud file (.ply or .txt). This is required.
+-o, --output          Full path (including filename) for the generated TreeQSM input .m script. Optional; defaults to './input.m'.
+-rdir, --results_dir  Directory where TreeQSM output .mat files will be stored. Optional; defaults to the current working directory.
+```
+
+Key TreeQSM input parameters for QSM generation:
+```
+--patchdiam1         List of candidate values for PatchDiam1 (patch size of the first uniform-size cover). Default: [0.2]
+--patchdiam2min      List of candidate values for PatchDiam2Min (minimum patch size of cover sets in the second cover). Default: [0.05]
+--patchdiam2max      List of candidate values for PatchDiam2Max (maximum cover set size in the stem's base for the second cover). Default: [0.15]
+-n, --n_models       Number of iterations to run TreeQSM for each parameter set. Default: 1
+--lcyl               (length/radius) ratio of fitting cylinders; controls the aspect ratio of model cylinders. Default: 4
+```
+
+Example with custom parameter values:
+```
+python generate_inputs-updated-matlab.py \
+  -i clouds/Tree_01.ply \
+  -o inputs/input_Tree_01.m \
+  -rdir results/ \
+  --patchdiam1 0.2 0.25 0.3 \
+  --patchdiam2min 0.05 0.1 0.15 \
+  --patchdiam2max 0.15 0.2 0.25 \
+  -n 5 \
+  --lcyl 4
+```
+For additional options to customise input parameters, run the script with the `-h` flag to view the help message.
 
 ---
 

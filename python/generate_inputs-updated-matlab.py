@@ -155,8 +155,9 @@ def generate_inputs(cloud_file, args):
                 with open(ofn, 'w') as fh:
                     # Header: add paths of source code
                     fh.write(f"addpath(genpath('{args.treeqsm_src}'));\n")
-                    # fh.write(f"addpath('{args.optqsm_src}');\n")
-                    
+                    # Insert timing start and start message
+                    fh.write("tStart = tic;\n")
+                    fh.write("disp(['TreeQSM job started at: ', datestr(now, 31)]);\n")
                     # Inputs
                     fh.write(f"input.PatchDiam1 = {pd1};\n")
                     fh.write(f"input.PatchDiam2Min = {pd2min};\n")
@@ -210,6 +211,11 @@ def generate_inputs(cloud_file, args):
                     fh.write("\tcatch\n")
                     fh.write("\tend\n")
                     fh.write("end\n")
+                    
+                    # Before exit, insert timing end and finish messages
+                    fh.write("elapsedTime = toc(tStart);\n")
+                    fh.write("disp(['TreeQSM job finished at: ', datestr(now, 31)]);\n")
+                    fh.write("disp(['Total elapsed time (seconds): ', num2str(elapsedTime)]);\n")
                     fh.write("exit;\n")
 
             idx_counter += 1           

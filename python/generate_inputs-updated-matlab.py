@@ -202,7 +202,7 @@ def generate_inputs(cloud_file, args):
                         fh.write("cloud = data(:, 1:3);\n")
 
                     # Iterate over models
-                    fh.write(f"for i = 0:{args.n_models - 1}\n")
+                    fh.write(f"for i = 1:{args.n_models}\n")
                     fh.write(f"\tinput.model = i;\n")
                     fh.write(f"\tinput.name = char(strcat('{results_dir}/QSM-{name}-{idx_counter}-', num2str(i), '.mat'));\n")
                     fh.write("\ttry\n")

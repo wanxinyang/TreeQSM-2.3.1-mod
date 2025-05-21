@@ -83,7 +83,7 @@ The script now requires a single input file (`-i`), and optionally an output fil
 
 ```
 -i, --input           Path to the input point cloud file (.ply or .txt). This is required.
--o, --output          Full path (including filename) for the generated TreeQSM input .m script. Optional; defaults to './input.m'.
+-o, --output          Full path (including filename) for the generated TreeQSM input .m script. Optional; if not provided, defaults to './{input}_{TreeID}_{idx}.m'.
 -rdir, --results_dir  Directory where TreeQSM output .mat files will be stored. Optional; defaults to the current working directory.
 ```
 
@@ -163,4 +163,3 @@ python /PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py ./*.mat
 ## License
 
 This repository follows the original [TreeQSM license](https://github.com/InverseTampere/TreeQSM/blob/master/LICENSE) and [optqsm license](https://github.com/apburt/optqsm/blob/master/LICENSE).
-

@@ -13,8 +13,8 @@ def parse_args():
                         required=True,
                         help='Path to the input point cloud file (.ply or .txt).')
     parser.add_argument('-o', '--output',
-                        type=str, default='./input.m',
-                        help="Full path (directory and filename) for the generated TreeQSM input script (.m). If not provided, defaults to './input.m'")
+                        type=str, default=None,
+                        help="Full path (directory and filename) for the generated TreeQSM input script (.m). If not provided, use default filename and save to current working dir")
     parser.add_argument('-rdir', '--results_dir',
                         type=str,
                         default=None,
@@ -140,16 +140,18 @@ def generate_inputs(cloud_file, args):
     name = os.path.splitext(os.path.basename(cloud_file))[0]
     ftype = os.path.splitext(cloud_file)[1].lower().lstrip('.')
 
-    # Extract base of the output filename (excluding .m extension)
-    output_dir = os.path.dirname(os.path.abspath(args.output))
-    output_base = os.path.splitext(os.path.basename(args.output))[0]
-
     idx_counter = 1
 
     for pd1 in args.patchdiam1:
         for pd2min in args.patchdiam2min:
             for pd2max in args.patchdiam2max:
-                ofn = os.path.join(output_dir, f"{output_base}_{idx_counter}.m")
+                # Set output filename according to whether args.output is provided
+                if args.output is None:
+                    ofn = os.path.join(os.getcwd(), f"input_{name}_{idx_counter}.m")
+                else:
+                    output_dir = os.path.dirname(os.path.abspath(args.output))
+                    output_base = os.path.splitext(os.path.basename(args.output))[0]
+                    ofn = os.path.join(output_dir, f"{output_base}_{idx_counter}.m")
                 with open(ofn, 'w') as fh:
                     # Header: add paths of source code
                     fh.write(f"addpath(genpath('{args.treeqsm_src}'));\n")
@@ -223,7 +225,10 @@ if __name__ == '__main__':
         args.results_dir = os.path.abspath(os.getcwd())
 
     # Check output's parent directory
-    output_dir = os.path.dirname(os.path.abspath(args.output))
+    if args.output is None:
+        output_dir = os.getcwd()
+    else:
+        output_dir = os.path.dirname(os.path.abspath(args.output))
     if not os.path.isdir(output_dir):
         print(f"\nError: path is not found:\n\t{output_dir}")
         print(f"Please create the directory or change the output path.")

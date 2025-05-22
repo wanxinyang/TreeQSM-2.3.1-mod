@@ -14,7 +14,7 @@ def parse_args():
                         help='Path to the input point cloud file (.ply or .txt).')
     parser.add_argument('-o', '--output',
                         type=str, default=None,
-                        help="Full path (directory and filename) for the generated TreeQSM input script (.m). If not provided, use default filename and save to current working dir")
+                        help="PATH/FILENAME for the generated TreeQSM input parameters script (.m). If not provided, use default filename and save to current working dir")
     parser.add_argument('-rdir', '--results_dir',
                         type=str,
                         default=None,
@@ -147,7 +147,7 @@ def generate_inputs(cloud_file, args):
             for pd2max in args.patchdiam2max:
                 # Set output filename according to whether args.output is provided
                 if args.output is None:
-                    ofn = os.path.join(os.getcwd(), f"input_{name}_{idx_counter}.m")
+                    ofn = os.path.join(os.getcwd(), f"{name}_param_{idx_counter}.m")
                 else:
                     output_dir = os.path.dirname(os.path.abspath(args.output))
                     output_base = os.path.splitext(os.path.basename(args.output))[0]
@@ -236,9 +236,8 @@ if __name__ == '__main__':
     else:
         output_dir = os.path.dirname(os.path.abspath(args.output))
     if not os.path.isdir(output_dir):
-        print(f"\nError: path is not found:\n\t{output_dir}")
-        print(f"Please create the directory or change the output path.")
-        sys.exit(1)
+        print(f"\nOutput directory does not exist, creating:\n\t{output_dir}")
+        os.makedirs(output_dir, exist_ok=True)
 
     if not os.path.isfile(args.input):
         raise FileNotFoundError(f"Point cloud file '{args.input}' does not exist.")

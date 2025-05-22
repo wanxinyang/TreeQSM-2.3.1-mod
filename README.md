@@ -33,16 +33,26 @@ conda activate treeqsm
 ## Workflow
 
 ### Directory Structure Example
-Organise your data as follows before running the workflow:
+Recommonded file structure:
 
 ```
 DATA/
-├── clouds/              # Original and converted point clouds (.ply)
-│   └── float64/         # Output of ply2float64.py
-├── models/              # Workspace for processing and results
-│   ├── inputs/          # TreeQSM input .m files
-│   ├── results/         # QSM reconstruction results (.mat)
-│   └── optqsm/          # Selected best-fitting QSMs and logs
+├── clouds/                     # Original and converted point clouds (.ply)
+│   └── float64/                # Output of ply2float64.py
+├── models/                     # Workspace for processing and results
+│   ├── param/                  # TreeQSM input parameter sets (.m files)       
+│   ├── results/                # QSM reconstruction results using all parameter sets
+│   │   └── Tree_A/  
+│   │   │   └── Tree_A-1-1.mat  # QSM using parameter set 1, model 1
+│   │   │   └── Tree_A-1-2.mat  # QSM using parameter set 1, model 2
+│   │   │   └── Tree_A-2-1.mat  # QSM using parameter set 2, model 1
+│   │   │   └── ...
+│   │   └── Tree_B/   
+│   │       └── Tree_B-1-1.mat
+│   │       └── ...      
+│   └── optqsm/                 # Selected best-fitting QSMs
+│       └── Tree_A_opt.mat
+│       └── Tree_B_opt.mat
 ```
 
 
@@ -64,30 +74,29 @@ python /PATH/TO/TreeQSM-2.3.1-mod/python/ply2float64.py -i /PATH/TO/file.ply
 **Available Flags:**
 
 ```
--i, --input INPUT       Path to a .ply file or a directory containing .ply files
--o, --output OUTPUT     Directory to save converted PLY file(s); defaults to a 'float64/'
-                        directory created alongside the input
---suffix SUFFIX     Optional suffix added before the .ply extension in output filenames;
-                        use 'none' to disable the suffix
+-i, --input       Path to a .ply file or a directory containing .ply files
+-o, --output      Directory to save converted PLY file(s); defaults to a 'float64/'
+--suffix          Optional suffix added before the .ply extension in output filenames; use 'none' to disable the suffix
 ```
-
 ---
 
 ### Step 2: Generate TreeQSM input files
 
+The script requires a single point cloud file (`-i` / `--input`) in either .ply or .txt format. 
+
 ```bash
-python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/generate_inputs-updated-matlab.py -i /PATH/TO/POINT_CLOUD.ply -o /PATH/TO/SAVE/INPUT_FILENAME.m -rdir /PATH/TO/SAVE/TreeQSM_OUTPUTS/
+python /PATH/TO/TreeQSM-2.3.1-mod-matlab/python/generate_inputs-updated-matlab.py -i /PATH/TO/POINT_CLOUD.ply
 ```
 
-The script now requires a single input file (`-i`), and optionally an output filename (`-o`), and a result directory (`-rdir`).
+The optional arguments to customise the output filename and directory:
 
 ```
--i, --input           Path to the input point cloud file (.ply or .txt). This is required.
--o, --output          Full path (including filename) for the generated TreeQSM input .m script. Optional; if not provided, defaults to './{input}_{TreeID}_{idx}.m'.
--rdir, --results_dir  Directory where TreeQSM output .mat files will be stored. Optional; defaults to the current working directory.
+-o, --output          Path and filename for the generated TreeQSM parameter set (.m file). Note, the filename must not contain arithmetic operators such as . + - * / .
+-rdir, --results_dir  Directory where TreeQSM results (.mat files) will be stored. Defaults to the current working directory.
 ```
 
-Key TreeQSM input parameters for QSM generation:
+The optional arguments to customise key TreeQSM input parameters for QSM generation:
+( for additional parameters, run the script with the `-h` flag to view the help message. )
 ```
 --patchdiam1         List of candidate values for PatchDiam1 (patch size of the first uniform-size cover). Default: [0.2]
 --patchdiam2min      List of candidate values for PatchDiam2Min (minimum patch size of cover sets in the second cover). Default: [0.05]
@@ -99,16 +108,16 @@ Key TreeQSM input parameters for QSM generation:
 Example with custom parameter values:
 ```
 python generate_inputs-updated-matlab.py \
-  -i clouds/Tree_01.ply \
-  -o inputs/input_Tree_01.m \
-  -rdir results/ \
+  -i clouds/float64/Tree_A.ply \
+  -o models/param/Tree_A_param.m \
+  -rdir models/results/Tree_A/ \
   --patchdiam1 0.2 0.25 0.3 \
   --patchdiam2min 0.05 0.1 0.15 \
   --patchdiam2max 0.15 0.2 0.25 \
-  -n 5 \
+  -n 3 \
   --lcyl 4
 ```
-For additional options to customise input parameters, run the script with the `-h` flag to view the help message.
+
 
 ---
 
@@ -123,7 +132,7 @@ matlab -nodisplay -r "run('FILENAME.m'); exit;" > FILENAME.log
 #### Option B: Batch-run all `.m` files in a directory
 
 ```bash
-cd /PATH/TO/models/inputs/TREEID/
+cd /PATH/TO/models/param/
 
 total=$(ls *.m | wc -l)
 count=0
@@ -157,6 +166,15 @@ cd /PATH/TO/models/optqsm/
 python /PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py ./*.mat
 ```
 
+---
+
+## Example for batch processing
+```bash
+conda activate treeqsm
+/PATH/TO/TreeQSM-2.3.1-mod/scripts/genInput_batch.sh
+/PATH/TO/TreeQSM-2.3.1-mod/scripts/runqsm.sh
+/PATH/TO/TreeQSM-2.3.1-mod/scripts/run_optqsm.sh
+```
 
 ---
 

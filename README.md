@@ -163,7 +163,7 @@ addpath('/PATH/TO/optqsm-mod/src/'); runopt('../results/*/*.mat'); exit;" > optq
 conda activate treeqsm
 cd /PATH/TO/models/optqsm/
 
-python /PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py ./*.mat
+python /PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py -i ./*.mat -odir .
 ```
 
 ---

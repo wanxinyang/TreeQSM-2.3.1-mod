@@ -151,9 +151,11 @@ done
 cd /PATH/TO/models/
 mkdir -p optqsm && cd optqsm/
 
+# for selecting optimal QSM from all candidate models (.mat) of a single tree
 matlab -nodisplay -r "addpath(genpath('/PATH/TO/TreeQSM-2.3.1-mod/src/')); \
-addpath('/PATH/TO/optqsm-mod/src/'); runopt('../results/*/*.mat'); exit;" > optqsm-log.log
+addpath('/PATH/TO/optqsm-mod/src/'); runopt('../results/Tree_A/*.mat'); exit;" > Tree_A_opt.log
 ```
+For batch processing multiple trees, see example script at `scripts/run_optqsm_multi_trees.sh`
 
 ---
 
@@ -173,7 +175,7 @@ python /PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py -i ./*.mat -odir .
 conda activate treeqsm
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/genInput_batch.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/runqsm.sh
-/PATH/TO/TreeQSM-2.3.1-mod/scripts/run_optqsm.sh
+/PATH/TO/TreeQSM-2.3.1-mod/scripts/run_optqsm_multi_trees.sh
 ```
 
 ---

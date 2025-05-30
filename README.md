@@ -165,7 +165,18 @@ For batch processing multiple trees, see example script at `scripts/run_optqsm_m
 conda activate treeqsm
 cd /PATH/TO/models/optqsm/
 
-python /PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py -i ./*.mat -odir .
+python /PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py -i FILENAME.mat 
+
+```
+
+The optional arguments to customise the output filename and directory:
+
+```
+# Option 1: If a filename is given, it will be used directly.
+-o /PATH/FILENAME.ply
+
+# Option 2: If a dir is given, output will have the same filename as input with .ply extension. 
+-o /PATH/
 ```
 
 ---
@@ -176,6 +187,7 @@ conda activate treeqsm
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/genInput_batch.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/runqsm.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/run_optqsm_multi_trees.sh
+/PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py -i /PATH/TO/models/optqsm/*.mat -o ./
 ```
 
 ---

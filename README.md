@@ -56,28 +56,14 @@ DATA/
 ```
 
 
-### Step 1: Convert point cloud files to float64 (if needed)
+### Step 1: Convert PLY point cloud to float64 (if needed)
 
-#### Option A: Convert all `.ply` files in a directory
-
-Replace /PATH/TO/ in all following commands according to your local file structure.
 
 ```bash
-python /PATH/TO/TreeQSM-2.3.1-mod/python/ply2float64.py -i /PATH/TO/clouds/
+python /PATH/TO/TreeQSM-2.3.1-mod/python/ply2float64.py -i FILENAME.ply -o FILENAME.ply
 ```
+-o / --output (optional): Full path to the output file; if the given directory doesn’t exist, it’s automatically created. If -o is not given, the output is saved in the current working directory with _float64 appended to the original filename.
 
-#### Option B: Convert a single `.ply` file
-
-```bash
-python /PATH/TO/TreeQSM-2.3.1-mod/python/ply2float64.py -i /PATH/TO/file.ply
-```
-**Available Flags:**
-
-```
--i, --input       Path to a .ply file or a directory containing .ply files
--o, --output      Directory to save converted PLY file(s); defaults to a 'float64/'
---suffix          Optional suffix added before the .ply extension in output filenames; use 'none' to disable the suffix
-```
 ---
 
 ### Step 2: Generate TreeQSM input files
@@ -184,6 +170,7 @@ The optional arguments to customise the output filename and directory:
 ## Example for batch processing
 ```bash
 conda activate treeqsm
+/PATH/TO/TreeQSM-2.3.1-mod/scripts/ply2float64_batch.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/genInput_batch.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/runqsm.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/run_optqsm_multi_trees.sh

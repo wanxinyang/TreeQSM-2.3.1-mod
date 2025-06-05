@@ -102,35 +102,22 @@ def write_ply(output_name, pc, comments=[]):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert the datatype from double to float64 in PLY file(s)')
     parser.add_argument('-i', '--input', type=str, required=True,
-                        help='Path to a .ply file or a directory containing .ply files')
+                        help='Path to a .ply file')
     parser.add_argument('-o', '--output', type=str, default=None,
-                        help="Directory to save converted PLY file(s); default is a 'float64/' dir alongside input")
-    parser.add_argument('--suffix', type=str, default='_float64',
-                        help="Suffix to add before .ply in output filenames, use 'none' to disable suffix")
+                        help="Path to save converted PLY file; default is current directory with suffix '_float64.ply'")
     args = parser.parse_args()
 
-    input_abs = os.path.abspath(args.input)
-    input_base_dir = input_abs if os.path.isdir(input_abs) else os.path.dirname(input_abs)
-    output_dir = args.output if args.output else os.path.join(input_base_dir, 'float64')
+    if not args.input.lower().endswith('.ply'):
+        raise ValueError("The input file must be a .ply file")
 
-    ply_files = get_ply_files(args.input)
-    os.makedirs(output_dir, exist_ok=True)
+    if args.output:
+        output_path = os.path.abspath(args.output)
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    else:
+        name, ext = os.path.splitext(os.path.basename(args.input))
+        output_path = os.path.join(os.getcwd(), f"{name}_float64.ply")
 
-    for f in ply_files:
-        print(f"Converting {f}")
-        # filename
-        fn = os.path.basename(f)
-        name, ext = os.path.splitext(fn)
-
-        # read the ply file
-        df = read_ply(f)
-
-        # construct output filename
-        if args.suffix.lower() != 'none':
-            out_fn = f"{name}{args.suffix}.ply"
-        else:
-            out_fn = fn
-
-        # write the ply file
-        write_ply(os.path.join(output_dir, out_fn), df)
-        print(f"Saved to {os.path.join(output_dir, out_fn)}")
+    df = read_ply(args.input)
+    print(f"\nConverting: \n{os.path.abspath(args.input)}\n")
+    write_ply(output_path, df)
+    print(f"Saved to: \n{output_path}\n")

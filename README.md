@@ -172,9 +172,9 @@ The optional arguments to customise the output filename and directory:
 conda activate treeqsm
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/ply2float64_batch.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/genInput_batch.sh
-/PATH/TO/TreeQSM-2.3.1-mod/scripts/runqsm.sh
+/PATH/TO/TreeQSM-2.3.1-mod/scripts/run_treeqsm_sequential.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/run_optqsm_multi_trees.sh
-/PATH/TO/TreeQSM-2.3.1-mod/python/mat2ply.py -i /PATH/TO/models/optqsm/*.mat -o ./
+/PATH/TO/TreeQSM-2.3.1-mod/scripts/mat2ply_batch.sh
 ```
 
 ---

@@ -1,13 +1,13 @@
 #!/bin/bash
-cd /data/TLS2/uk/epping-pollards/demo/models/newoptqsm/
+cd /PATH/TO/models/optqsm/
 
 # Set paths (edit as needed)
 TREEQSM="/data/TLS2/tools/qsm/TreeQSM-2.3.1-mod-matlab/src/"
 OPTQSM="/data/TLS2/tools/qsm/optqsm-mod-matlab/src/"
-PARENT_DIR="/data/TLS2/uk/epping-pollards/demo/models/results/"
+QSM_CANDIDATE_DIR="/PATH/TO/models/intermediate/qsm_candidates/"
 
 # Loop over subdirectories
-for SUBDIR in "$PARENT_DIR"/*/; do
+for SUBDIR in "$QSM_CANDIDATE_DIR"/*/; do
     # Check if the subdir contains any .mat files
     MAT_FILES=("$SUBDIR"*.mat)
     if [ -e "${MAT_FILES[0]}" ]; then

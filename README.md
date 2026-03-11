@@ -40,8 +40,8 @@ DATA/
 ├── clouds/                     # Original and converted point clouds (.ply)
 │   └── float64/                # Output of ply2float64.py
 ├── models/                     # Workspace for processing and results
-│   ├── param/                  # TreeQSM input parameter sets (.m files)       
-│   ├── results/                # QSM reconstruction results using all parameter sets
+│   ├── params/                  # TreeQSM input parameter sets (.m files)       
+│   ├── qsm_candidates/                # QSM reconstruction results using all parameter sets
 │   │   └── Tree_A/  
 │   │   │   └── Tree_A-1-1.mat  # QSM using parameter set 1, model 1
 │   │   │   └── Tree_A-1-2.mat  # QSM using parameter set 1, model 2
@@ -95,8 +95,8 @@ Example with custom parameter values:
 ```
 python generate_inputs-updated-matlab.py \
   -i clouds/float64/Tree_A.ply \
-  -o models/param/Tree_A_param.m \
-  -rdir models/results/Tree_A/ \
+  -o models/params/Tree_A_param.m \
+  -rdir models/qsm_candidates/Tree_A/ \
   --patchdiam1 0.2 0.25 0.3 \
   --patchdiam2min 0.05 0.1 0.15 \
   --patchdiam2max 0.15 0.2 0.25 \
@@ -118,7 +118,7 @@ matlab -nodisplay -r "run('FILENAME.m'); exit;" > FILENAME.log
 #### Option B: Batch-run all `.m` files in a directory
 
 ```bash
-cd /PATH/TO/models/param/
+cd /PATH/TO/models/params/
 
 total=$(ls *.m | wc -l)
 count=0
@@ -139,7 +139,7 @@ mkdir -p optqsm && cd optqsm/
 
 # for selecting optimal QSM from all candidate models (.mat) of a single tree
 matlab -nodisplay -r "addpath(genpath('/PATH/TO/TreeQSM-2.3.1-mod/src/')); \
-addpath('/PATH/TO/optqsm-mod/src/'); runopt('../results/Tree_A/*.mat'); exit;" > Tree_A_opt.log
+addpath('/PATH/TO/optqsm-mod/src/'); runopt('../qsm_candidates/Tree_A/*.mat'); exit;" > Tree_A_opt.log
 ```
 For batch processing multiple trees, see example script at `scripts/run_optqsm_multi_trees.sh`
 
@@ -172,7 +172,7 @@ The optional arguments to customise the output filename and directory:
 conda activate treeqsm
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/ply2float64_batch.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/genInput_batch.sh
-/PATH/TO/TreeQSM-2.3.1-mod/scripts/run_treeqsm_sequential.sh
+/PATH/TO/TreeQSM-2.3.1-mod/scripts/run_treeqsm_sequential.sh /PATH/TO/models/params
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/run_optqsm_multi_trees.sh
 /PATH/TO/TreeQSM-2.3.1-mod/scripts/mat2ply_batch.sh
 ```

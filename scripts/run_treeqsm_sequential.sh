@@ -3,7 +3,45 @@
 # Sequential version of runqsm.sh with output file checking
 # Runs TreeQSM .m files one at a time, skipping files with existing outputs
 
-cd /PATH/TO/models/intermediate/params
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 /PATH/TO/PARAMS"
+    echo "  - /PATH/TO/PARAMS can be either:"
+    echo "    1) A directory containing .m files"
+    echo "    2) A single .m file"
+    exit 1
+fi
+
+input_path="$1"
+
+if [ -d "$input_path" ]; then
+    target_dir="$input_path"
+    mode="directory"
+elif [ -f "$input_path" ] && [[ "$input_path" == *.m ]]; then
+    target_dir="$(dirname "$input_path")"
+    target_file="$(basename "$input_path")"
+    mode="single"
+else
+    echo "Error: Input must be a directory or a .m file: $input_path"
+    exit 1
+fi
+
+if ! cd "$target_dir"; then
+    echo "Error: Cannot change directory to: $target_dir"
+    exit 1
+fi
+
+if [ "$mode" = "directory" ]; then
+    shopt -s nullglob
+    m_files=(*.m)
+    shopt -u nullglob
+else
+    m_files=("$target_file")
+fi
+
+if [ "${#m_files[@]}" -eq 0 ]; then
+    echo "No .m files found to process in: $target_dir"
+    exit 0
+fi
 
 # Function to check if output files already exist
 check_output_exists() {
@@ -30,7 +68,7 @@ check_output_exists() {
     
     if [ -n "$result_dir" ] && [ -d "$result_dir" ]; then
         # Extract tree name and parameter set from filename
-        # e.g., Ashtead_P1_T01_1.m -> Ashtead_P1_T01-1-*.mat
+        # e.g., Site_P1_T01_1.m -> Site_P1_T01-1-*.mat
         local tree_param=$(echo "$base" | sed 's/_\([0-9]*\)$/-\1-/')
         
         # Check if all expected .mat files exist
@@ -45,12 +83,12 @@ check_output_exists() {
 }
 
 # Count total files
-total=$(ls *.m | wc -l)
+total=${#m_files[@]}
 echo "Found $total .m files to process"
 
 # Check how many need to run (pre-scan)
 need_run=0
-for f in *.m; do
+for f in "${m_files[@]}"; do
     if ! check_output_exists "$f"; then
         need_run=$((need_run+1))
     fi
@@ -63,7 +101,7 @@ echo "----------------------------------------"
 count=0
 processed=0
 skipped=0
-for f in *.m; do
+for f in "${m_files[@]}"; do
     count=$((count+1))
     
     # Check if output already exists
@@ -90,11 +128,14 @@ echo "Check individual log files (*.log) for details"
 echo "Generating summary..."
 success=0
 failed=0
-for log in *.log; do
-    if grep -q "error\|Error\|ERROR" "$log" 2>/dev/null; then
-        failed=$((failed+1))
-    else
-        success=$((success+1))
+for f in "${m_files[@]}"; do
+    log="${f%%.m}.log"
+    if [ -f "$log" ]; then
+        if grep -q "error\|Error\|ERROR" "$log" 2>/dev/null; then
+            failed=$((failed+1))
+        else
+            success=$((success+1))
+        fi
     fi
 done
 

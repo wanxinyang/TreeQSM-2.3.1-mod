@@ -4,7 +4,8 @@
 # Runs multiple TreeQSM .m files in parallel using GNU parallel or background jobs
 #
 # USAGE:
-#   ./runqsm_parallel.sh
+#   ./run_treeqsm_parallel.sh /PATH/TO/PARAMS_DIR
+#   ./run_treeqsm_parallel.sh /PATH/TO/file1.m /PATH/TO/file2.m [...]
 #
 # ENVIRONMENT VARIABLES (optional):
 #   MATLAB_MEM_GB    - Estimated memory per MATLAB job in GB (default: 12)
@@ -12,15 +13,59 @@
 #
 # EXAMPLES:
 #   # Use default settings (max 5 jobs, accounting for MATLAB's internal parallelism)
-#   ./runqsm_parallel.sh
+#   ./run_treeqsm_parallel.sh /path/to/params_dir
+#   ./run_treeqsm_parallel.sh /path/to/tree_1.m /path/to/tree_2.m
 #
 #   # For large point clouds requiring more memory per job
-#   MATLAB_MEM_GB=16 ./runqsm_parallel.sh
+#   MATLAB_MEM_GB=16 ./run_treeqsm_parallel.sh /path/to/params_dir
 #
 #   # Manually limit to 3 parallel jobs for best performance
-#   MAX_JOBS=3 ./runqsm_parallel.sh
+#   MAX_JOBS=3 ./run_treeqsm_parallel.sh /path/to/params_dir
 
-cd /PATH/TO/models/intermediate/params
+if [ "$#" -lt 1 ]; then
+    echo "Usage:"
+    echo "  $0 /PATH/TO/PARAMS_DIR"
+    echo "  $0 /PATH/TO/file1.m /PATH/TO/file2.m [... ]"
+    echo ""
+    echo "Input must be either:"
+    echo "  1) One directory containing .m files"
+    echo "  2) Two or more individual .m files"
+    exit 1
+fi
+
+m_files=()
+
+if [ "$#" -eq 1 ] && [ -d "$1" ]; then
+    target_dir="$1"
+    if ! cd "$target_dir"; then
+        echo "Error: Cannot change directory to: $target_dir"
+        exit 1
+    fi
+    shopt -s nullglob
+    m_files=(*.m)
+    shopt -u nullglob
+elif [ "$#" -ge 2 ]; then
+    for input_path in "$@"; do
+        if [ -d "$input_path" ]; then
+            echo "Error: When providing multiple inputs, each input must be a .m file (not a directory): $input_path"
+            exit 1
+        fi
+        if [ ! -f "$input_path" ] || [[ "$input_path" != *.m ]]; then
+            echo "Error: Invalid .m file input: $input_path"
+            exit 1
+        fi
+        m_files+=("$input_path")
+    done
+else
+    echo "Error: Single .m file input is not supported in parallel mode."
+    echo "Provide either one directory, or two or more .m files."
+    exit 1
+fi
+
+if [ "${#m_files[@]}" -eq 0 ]; then
+    echo "No .m files found to process"
+    exit 0
+fi
 
 # Function to check if output files already exist
 check_output_exists() {
@@ -35,6 +80,12 @@ check_output_exists() {
     if [ -z "$result_dir" ]; then
         # Fallback: try to extract from direct path assignment
         result_dir=$(grep -m 1 "input.name = " "$f" | sed -n "s/.*'\(.*\)\/[^/]*'.*/\1/p")
+    fi
+
+    if [ -n "$result_dir" ] && [[ "$result_dir" != /* ]]; then
+        local file_dir
+        file_dir=$(cd "$(dirname "$f")" 2>/dev/null && pwd)
+        result_dir="$file_dir/$result_dir"
     fi
     
     # Extract the expected number of models from the for loop in the .m file
@@ -67,6 +118,18 @@ run_matlab() {
     local f="$1"
     local idx="$2"
     local total="$3"
+    local file_dir
+    local file_base
+    local run_path
+    local log_path
+
+    file_dir=$(dirname "$f")
+    file_base=$(basename "$f" .m)
+    log_path="$file_dir/$file_base.log"
+    run_path="$f"
+    if [[ "$run_path" != /* ]]; then
+        run_path="$(cd "$file_dir" 2>/dev/null && pwd)/$(basename "$f")"
+    fi
     
     # Check if output already exists
     if check_output_exists "$f"; then
@@ -75,7 +138,7 @@ run_matlab() {
     fi
     
     echo "[$idx/$total] Starting $f..."
-    matlab -nodisplay -nosplash -r "run(fullfile(pwd,'$f')); exit;" > "${f%%.m}.log" 2>&1
+    matlab -nodisplay -nosplash -r "run('$run_path'); exit;" > "$log_path" 2>&1
     echo "[$idx/$total] Completed $f"
 }
 
@@ -83,17 +146,22 @@ export -f run_matlab
 export -f check_output_exists
 
 # Count total files
-total=$(ls *.m | wc -l)
+total=${#m_files[@]}
 echo "Found $total .m files to process"
 
 # Check how many need to run (pre-scan)
 need_run=0
-for f in *.m; do
+for f in "${m_files[@]}"; do
     if ! check_output_exists "$f"; then
         need_run=$((need_run+1))
     fi
 done
 echo "Files needing processing: $need_run (skipping $((total-need_run)) with existing outputs)"
+
+if [ "$need_run" -eq 0 ]; then
+    echo "No files require processing. Exiting."
+    exit 0
+fi
 
 # Detect number of CPU cores (leave 1 core free for system)
 if command -v nproc &> /dev/null; then
@@ -174,7 +242,7 @@ echo "----------------------------------------"
 if command -v parallel &> /dev/null; then
     # Method 1: Use GNU parallel (preferred - better load balancing)
     echo "Using GNU parallel for job execution"
-    ls *.m | nl | parallel -j $N_JOBS --colsep '\t' run_matlab {2} {1} $total
+    printf '%s\n' "${m_files[@]}" | nl -ba | parallel -j "$N_JOBS" --colsep '\t' run_matlab {2} {1} "$total"
 else
     # Method 2: Use background jobs with manual process control
     echo "Using bash background jobs for execution"
@@ -183,7 +251,7 @@ else
     count=0
     running=0
     
-    for f in *.m; do
+    for f in "${m_files[@]}"; do
         count=$((count+1))
         
         # Start job in background
@@ -213,11 +281,14 @@ echo "Check individual log files (*.log) for details"
 echo "Generating summary..."
 success=0
 failed=0
-for log in *.log; do
-    if grep -q "error\|Error\|ERROR" "$log" 2>/dev/null; then
-        failed=$((failed+1))
-    else
-        success=$((success+1))
+for f in "${m_files[@]}"; do
+    log="$(dirname "$f")/$(basename "$f" .m).log"
+    if [ -f "$log" ]; then
+        if grep -q "error\|Error\|ERROR" "$log" 2>/dev/null; then
+            failed=$((failed+1))
+        else
+            success=$((success+1))
+        fi
     fi
 done
 
